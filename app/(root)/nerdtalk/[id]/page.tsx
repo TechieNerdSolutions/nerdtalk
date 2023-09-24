@@ -2,10 +2,10 @@ import { redirect } from "next/navigation";
 import { currentUser } from "@clerk/nextjs";
 
 import Comment from "@/components/forms/Comment";
-import ThreadCard from "@/components/cards/ThreadCard";
+import NerdTalkCard from "@/components/cards/NerdTalkCard";
 
 import { fetchUser } from "@/lib/actions/user.actions";
-import { fetchThreadById } from "@/lib/actions/thread.actions";
+import { fetchNerdTalkById } from "@/lib/actions/nerdtalk.actions";
 
 export const revalidate = 0;
 
@@ -18,34 +18,34 @@ async function page({ params }: { params: { id: string } }) {
   const userInfo = await fetchUser(user.id);
   if (!userInfo?.onboarded) redirect("/onboarding");
 
-  const thread = await fetchThreadById(params.id);
+  const nerdTalk = await fetchNerdTalkById(params.id);
 
   return (
     <section className='relative'>
       <div>
-        <ThreadCard
-          id={thread._id}
+        <NerdTalkCard
+          id={nerdTalk._id}
           currentUserId={user.id}
-          parentId={thread.parentId}
-          content={thread.text}
-          author={thread.author}
-          community={thread.community}
-          createdAt={thread.createdAt}
-          comments={thread.children}
+          parentId={nerdTalk.parentId}
+          content={nerdTalk.text}
+          author={nerdTalk.author}
+          community={nerdTalk.community}
+          createdAt={nerdTalk.createdAt}
+          comments={nerdTalk.children}
         />
       </div>
 
       <div className='mt-7'>
         <Comment
-          threadId={params.id}
+          nerdTalkId={params.id}
           currentUserImg={user.imageUrl}
           currentUserId={JSON.stringify(userInfo._id)}
         />
       </div>
 
       <div className='mt-10'>
-        {thread.children.map((childItem: any) => (
-          <ThreadCard
+        {nerdTalk.children.map((childItem: any) => (
+          <NerdTalkCard
             key={childItem._id}
             id={childItem._id}
             currentUserId={user.id}

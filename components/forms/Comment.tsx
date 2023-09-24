@@ -17,42 +17,42 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 
-import { CommentValidation } from "@/lib/validations/thread";
-import { addCommentToThread } from "@/lib/actions/thread.actions";
+import { CommentValidation } from "@/lib/validations/nerd";
+import { addCommentToNerdTalk } from "@/lib/actions/nerdtalk.actions";
 
 interface Props {
-  threadId: string;
+  nerdTalkId: string;
   currentUserImg: string;
   currentUserId: string;
 }
 
-function Comment({ threadId, currentUserImg, currentUserId }: Props) {
+function Comment({ nerdTalkId, currentUserImg, currentUserId }: Props) {
   const pathname = usePathname();
 
   const form = useForm<z.infer<typeof CommentValidation>>({
     resolver: zodResolver(CommentValidation),
     defaultValues: {
-      thread: "",
+      nerdtalk: "",
     },
   });
 
   const onSubmit = async (values: z.infer<typeof CommentValidation>) => {
-    await addCommentToThread(
-      threadId,
-      values.thread,
+    await addCommentToNerdTalk(
+      nerdTalkId,
+      values.nerdtalk,
       JSON.parse(currentUserId),
       pathname
     );
 
     form.reset();
-  };
+  }
 
   return (
     <Form {...form}>
       <form className='comment-form' onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
-          name='thread'
+          name='nerdtalk'
           render={({ field }) => (
             <FormItem className='flex w-full items-center gap-3'>
               <FormLabel>
