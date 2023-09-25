@@ -22,7 +22,7 @@ async function Page() {
         {activity.length > 0 ? (
           <>
             {activity.map((activity) => (
-              <Link key={activity._id} href={`/nerdtalk/${activity.parentId}`}>
+              <Link key={activity._id} href={`/thread/${activity.parentId}`}>
                 <article className='activity-card'>
                   <Image
                     src={activity.author.image}
@@ -35,7 +35,7 @@ async function Page() {
                     <span className='mr-1 text-primary-500'>
                       {activity.author.name}
                     </span>{" "}
-                    replied to your NerdTalk
+                    replied to your nerd talk
                   </p>
                 </article>
               </Link>

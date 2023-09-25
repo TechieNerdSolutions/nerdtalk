@@ -16,10 +16,10 @@ const userSchema = new mongoose.Schema({
   },
   image: String,
   bio: String,
-  nerdtalks: [
+  threads: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "NerdTalk",
+      ref: "Thread",
     },
   ],
   onboarded: {

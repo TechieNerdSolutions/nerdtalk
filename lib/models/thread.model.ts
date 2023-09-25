@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const nerdTalkSchema = new mongoose.Schema({
+const threadSchema = new mongoose.Schema({
   text: {
     type: String,
     required: true,
@@ -24,11 +24,11 @@ const nerdTalkSchema = new mongoose.Schema({
   children: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "NerdTalk",
+      ref: "Thread",
     },
   ],
 });
 
-const NerdTalk = mongoose.models.NerdTalk || mongoose.model("NerdTalk", nerdTalkSchema);
+const Thread = mongoose.models.Thread || mongoose.model("Thread", threadSchema);
 
-export default NerdTalk;
+export default Thread;

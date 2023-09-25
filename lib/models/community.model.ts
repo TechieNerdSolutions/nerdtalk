@@ -20,10 +20,10 @@ const communitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
   },
-  nerdtalks: [
+  threads: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "NerdTalk",
+      ref: "Thread",
     },
   ],
   members: [

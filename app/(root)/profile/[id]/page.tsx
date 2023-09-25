@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 
 import { profileTabs } from "@/constants";
 
-import NerdTalksTab from "@/components/shared/NerdTalksTab";
+import ThreadsTab from "@/components/shared/ThreadsTab";
 import ProfileHeader from "@/components/shared/ProfileHeader";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -29,7 +29,7 @@ async function Page({ params }: { params: { id: string } }) {
       />
 
       <div className='mt-9'>
-        <Tabs defaultValue='nerdtalks' className='w-full'>
+        <Tabs defaultValue='threads' className='w-full'>
           <TabsList className='tab'>
             {profileTabs.map((tab) => (
               <TabsTrigger key={tab.label} value={tab.value} className='tab'>
@@ -42,9 +42,9 @@ async function Page({ params }: { params: { id: string } }) {
                 />
                 <p className='max-sm:hidden'>{tab.label}</p>
 
-                {tab.label === "NerdTalks" && (
+                {tab.label === "Threads" && (
                   <p className='ml-1 rounded-sm bg-light-4 px-2 py-1 !text-tiny-medium text-light-2'>
-                    {userInfo.nerdtalks.length}
+                    {userInfo.threads.length}
                   </p>
                 )}
               </TabsTrigger>
@@ -57,7 +57,7 @@ async function Page({ params }: { params: { id: string } }) {
               className='w-full text-light-1'
             >
               {/* @ts-ignore */}
-              <NerdTalksTab
+              <ThreadsTab
                 currentUserId={user.id}
                 accountId={userInfo.id}
                 accountType='User'

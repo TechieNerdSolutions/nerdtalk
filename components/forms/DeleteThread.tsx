@@ -3,18 +3,18 @@
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 
-import { deleteNerdTalk } from "@/lib/actions/nerdtalk.actions";
+import { deleteThread } from "@/lib/actions/thread.actions";
 
 interface Props {
-  nerdTalkId: string;
+  threadId: string;
   currentUserId: string;
   authorId: string;
   parentId: string | null;
   isComment?: boolean;
 }
 
-function DeleteNerdTalk({
-  nerdTalkId,
+function DeleteThread({
+  threadId,
   currentUserId,
   authorId,
   parentId,
@@ -28,12 +28,12 @@ function DeleteNerdTalk({
   return (
     <Image
       src='/assets/delete.svg'
-      alt='delete'
+      alt='delte'
       width={18}
       height={18}
       className='cursor-pointer object-contain'
       onClick={async () => {
-        await deleteNerdTalk(JSON.parse(nerdTalkId), pathname);
+        await deleteThread(JSON.parse(threadId), pathname);
         if (!parentId || !isComment) {
           router.push("/");
         }
@@ -42,4 +42,4 @@ function DeleteNerdTalk({
   );
 }
 
-export default DeleteNerdTalk;
+export default DeleteThread;

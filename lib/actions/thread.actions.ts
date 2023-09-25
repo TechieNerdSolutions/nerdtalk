@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { connectToDB } from "../mongoose";
 
 import User from "../models/user.model";
-import NerdTalk from "../models/nerdtalk.model";
+import Thread from "../models/thread.model";
 import Community from "../models/community.model";
 
 export async function fetchPosts(pageNumber = 1, pageSize = 20) {
@@ -14,8 +14,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
   // Calculate the number of posts to skip based on the page number and page size.
   const skipAmount = (pageNumber - 1) * pageSize;
 
-  // Create a query to fetch the posts that have no parent (top-level NerdTalks) (a NerdTalk that is not a comment/reply).
-  const postsQuery = NerdTalk.find({ parentId: { $in: [null, undefined] } })
+  // Create a query to fetch the posts that have no parent (top-level threads) (a thread that is not a comment/reply).
+  const postsQuery = Thread.find({ parentId: { $in: [null, undefined] } })
     .sort({ createdAt: "desc" })
     .skip(skipAmount)
     .limit(pageSize)
@@ -36,8 +36,8 @@ export async function fetchPosts(pageNumber = 1, pageSize = 20) {
       },
     });
 
-  // Count the total number of top-level NerdTalks (NerdTalks that are not comments).
-  const totalPostsCount = await NerdTalk.countDocuments({
+  // Count the total number of top-level posts (threads) i.e., threads that are not comments.
+  const totalPostsCount = await Thread.countDocuments({
     parentId: { $in: [null, undefined] },
   }); // Get the total count of posts
 
@@ -55,7 +55,7 @@ interface Params {
   path: string,
 }
 
-export async function createNerdTalk({ text, author, communityId, path }: Params
+export async function createThread({ text, author, communityId, path }: Params
 ) {
   try {
     connectToDB();
@@ -65,7 +65,7 @@ export async function createNerdTalk({ text, author, communityId, path }: Params
       { _id: 1 }
     );
 
-    const createdNerdTalk = await NerdTalk.create({
+    const createdThread = await Thread.create({
       text,
       author,
       community: communityIdObject, // Assign communityId if provided, or leave it null for personal account
@@ -73,95 +73,95 @@ export async function createNerdTalk({ text, author, communityId, path }: Params
 
     // Update User model
     await User.findByIdAndUpdate(author, {
-      $push: { nerdtalks: createdNerdTalk._id },
+      $push: { threads: createdThread._id },
     });
 
     if (communityIdObject) {
       // Update Community model
       await Community.findByIdAndUpdate(communityIdObject, {
-        $push: { nerdtalks: createdNerdTalk._id },
+        $push: { threads: createdThread._id },
       });
     }
 
     revalidatePath(path);
   } catch (error: any) {
-    throw new Error(`Failed to create NerdTalk: ${error.message}`);
+    throw new Error(`Failed to give advice: ${error.message}`);
   }
 }
 
-async function fetchAllChildNerdTalks(nerdtalkId: string): Promise<any[]> {
-  const childNerdTalks = await NerdTalk.find({ parentId: nerdtalkId });
+async function fetchAllChildThreads(threadId: string): Promise<any[]> {
+  const childThreads = await Thread.find({ parentId: threadId });
 
-  const descendantNerdTalks = [];
-  for (const childNerdTalk of childNerdTalks) {
-    const descendants = await fetchAllChildNerdTalks(childNerdTalk._id);
-    descendantNerdTalks.push(childNerdTalk, ...descendants);
+  const descendantThreads = [];
+  for (const childThread of childThreads) {
+    const descendants = await fetchAllChildThreads(childThread._id);
+    descendantThreads.push(childThread, ...descendants);
   }
 
-  return descendantNerdTalks;
+  return descendantThreads;
 }
 
-export async function deleteNerdTalk(id: string, path: string): Promise<void> {
+export async function deleteThread(id: string, path: string): Promise<void> {
   try {
     connectToDB();
 
-    // Find the NerdTalk to be deleted (the main NerdTalk)
-    const mainNerdTalk = await NerdTalk.findById(id).populate("author community");
+    // Find the thread to be deleted (the main thread)
+    const mainThread = await Thread.findById(id).populate("author community");
 
-    if (!mainNerdTalk) {
-      throw new Error("NerdTalk not found");
+    if (!mainThread) {
+      throw new Error("Talk not found");
     }
 
-    // Fetch all child NerdTalks and their descendants recursively
-    const descendantNerdTalks = await fetchAllChildNerdTalks(id);
+    // Fetch all child threads and their descendants recursively
+    const descendantThreads = await fetchAllChildThreads(id);
 
-    // Get all descendant NerdTalk IDs including the main NerdTalk ID and child NerdTalk IDs
-    const descendantNerdTalkIds = [
+    // Get all descendant thread IDs including the main thread ID and child thread IDs
+    const descendantThreadIds = [
       id,
-      ...descendantNerdTalks.map((nerdtalk) => nerdtalk._id),
+      ...descendantThreads.map((thread) => thread._id),
     ];
 
     // Extract the authorIds and communityIds to update User and Community models respectively
     const uniqueAuthorIds = new Set(
       [
-        ...descendantNerdTalks.map((nerdtalk) => nerdtalk.author?._id?.toString()), // Use optional chaining to handle possible undefined values
-        mainNerdTalk.author?._id?.toString(),
+        ...descendantThreads.map((thread) => thread.author?._id?.toString()), // Use optional chaining to handle possible undefined values
+        mainThread.author?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
     const uniqueCommunityIds = new Set(
       [
-        ...descendantNerdTalks.map((nerdtalk) => nerdtalk.community?._id?.toString()), // Use optional chaining to handle possible undefined values
-        mainNerdTalk.community?._id?.toString(),
+        ...descendantThreads.map((thread) => thread.community?._id?.toString()), // Use optional chaining to handle possible undefined values
+        mainThread.community?._id?.toString(),
       ].filter((id) => id !== undefined)
     );
 
-    // Recursively delete child NerdTalks and their descendants
-    await NerdTalk.deleteMany({ _id: { $in: descendantNerdTalkIds } });
+    // Recursively delete child threads and their descendants
+    await Thread.deleteMany({ _id: { $in: descendantThreadIds } });
 
     // Update User model
     await User.updateMany(
       { _id: { $in: Array.from(uniqueAuthorIds) } },
-      { $pull: { nerdtalks: { $in: descendantNerdTalkIds } } }
+      { $pull: { threads: { $in: descendantThreadIds } } }
     );
 
     // Update Community model
     await Community.updateMany(
       { _id: { $in: Array.from(uniqueCommunityIds) } },
-      { $pull: { nerdtalks: { $in: descendantNerdTalkIds } } }
+      { $pull: { threads: { $in: descendantThreadIds } } }
     );
 
     revalidatePath(path);
   } catch (error: any) {
-    throw a Error(`Failed to delete NerdTalk: ${error.message}`);
+    throw new Error(`Failed to delete your talk: ${error.message}`);
   }
 }
 
-export async function fetchNerdTalkById(nerdtalkId: string) {
+export async function fetchThreadById(threadId: string) {
   connectToDB();
 
   try {
-    const nerdtalk = await NerdTalk.findById(nerdtalkId)
+    const thread = await Thread.findById(threadId)
       .populate({
         path: "author",
         model: User,
@@ -182,7 +182,7 @@ export async function fetchNerdTalkById(nerdtalkId: string) {
           },
           {
             path: "children", // Populate the children field within children
-            model: NerdTalk, // The model of the nested children (assuming it's the same "NerdTalk" model)
+            model: Thread, // The model of the nested children (assuming it's the same "Thread" model)
             populate: {
               path: "author", // Populate the author field within nested children
               model: User,
@@ -193,15 +193,15 @@ export async function fetchNerdTalkById(nerdtalkId: string) {
       })
       .exec();
 
-    return nerdtalk;
+    return thread;
   } catch (err) {
-    console.error("Error while fetching NerdTalk:", err);
-    throw new Error("Unable to fetch NerdTalk");
+    console.error("Error while fetching thread:", err);
+    throw new Error("Unable to fetch thread");
   }
 }
 
-export async function addCommentToNerdTalk(
-  nerdtalkId: string,
+export async function addCommentToThread(
+  threadId: string,
   commentText: string,
   userId: string,
   path: string
@@ -209,28 +209,28 @@ export async function addCommentToNerdTalk(
   connectToDB();
 
   try {
-    // Find the original NerdTalk by its ID
-    const originalNerdTalk = await NerdTalk.findById(nerdtalkId);
+    // Find the original thread by its ID
+    const originalThread = await Thread.findById(threadId);
 
-    if (!originalNerdTalk) {
-      throw new Error("NerdTalk not found");
+    if (!originalThread) {
+      throw new Error("Talk not found");
     }
 
-    // Create the new comment NerdTalk
-    const commentNerdTalk = new NerdTalk({
+    // Create the new comment thread
+    const commentThread = new Thread({
       text: commentText,
       author: userId,
-      parentId: nerdtalkId, // Set the parentId to the original NerdTalk's ID
+      parentId: threadId, // Set the parentId to the original thread's ID
     });
 
-    // Save the comment NerdTalk to the database
-    const savedCommentNerdTalk = await commentNerdTalk.save();
+    // Save the comment thread to the database
+    const savedCommentThread = await commentThread.save();
 
-    // Add the comment NerdTalk's ID to the original NerdTalk's children array
-    originalNerdTalk.children.push(savedCommentNerdTalk._id);
+    // Add the comment thread's ID to the original thread's children array
+    originalThread.children.push(savedCommentThread._id);
 
-    // Save the updated original NerdTalk to the database
-    await originalNerdTalk.save();
+    // Save the updated original thread to the database
+    await originalThread.save();
 
     revalidatePath(path);
   } catch (err) {

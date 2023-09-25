@@ -1,10 +1,10 @@
 import { currentUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 
-import NerdTalkCard from "@/components/cards/NerdTalkCard";
+import ThreadCard from "@/components/cards/ThreadCard";
 import Pagination from "@/components/shared/Pagination";
 
-import { fetchPosts } from "@/lib/actions/nerdtalk.actions";
+import { fetchPosts } from "@/lib/actions/thread.actions";
 import { fetchUser } from "@/lib/actions/user.actions";
 
 async function Home({
@@ -29,11 +29,11 @@ async function Home({
 
       <section className='mt-9 flex flex-col gap-10'>
         {result.posts.length === 0 ? (
-          <p className='no-result'>No NerdTalks found</p>
+          <p className='no-result'>No threads found</p>
         ) : (
           <>
             {result.posts.map((post) => (
-              <NerdTalkCard
+              <ThreadCard
                 key={post._id}
                 id={post._id}
                 currentUserId={user.id}

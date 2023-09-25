@@ -16,8 +16,8 @@ export const sidebarLinks = [
   },
   {
     imgURL: "/assets/create.svg",
-    route: "/create-talk",
-    label: "Create NerdTalk",
+    route: "/create-thread",
+    label: "Give Advice",
   },
   {
     imgURL: "/assets/community.svg",
@@ -32,13 +32,13 @@ export const sidebarLinks = [
 ];
 
 export const profileTabs = [
-  { value: "nerdtalks", label: "NerdTalks", icon: "/assets/reply.svg" },
+  { value: "nerdtalk", label: "NerdTalk", icon: "/assets/reply.svg" },
   { value: "replies", label: "Replies", icon: "/assets/members.svg" },
   { value: "tagged", label: "Tagged", icon: "/assets/tag.svg" },
 ];
 
 export const communityTabs = [
-  { value: "nerdtalks", label: "NerdTalks", icon: "/assets/reply.svg" },
+  { value: "nerdtalk", label: "NerdTalk", icon: "/assets/reply.svg" },
   { value: "members", label: "Members", icon: "/assets/members.svg" },
   { value: "requests", label: "Requests", icon: "/assets/request.svg" },
 ];

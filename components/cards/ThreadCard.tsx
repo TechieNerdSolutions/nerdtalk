@@ -2,7 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { formatDateString } from "@/lib/utils";
-import DeleteNerdTalk from "../forms/DeleteNerdTalk";
+import DeleteThread from "../forms/DeleteThread";
+
 interface Props {
   id: string;
   currentUserId: string;
@@ -27,7 +28,7 @@ interface Props {
   isComment?: boolean;
 }
 
-function NerdTalkCard({
+function ThreadCard({
   id,
   currentUserId,
   parentId,
@@ -40,8 +41,9 @@ function NerdTalkCard({
 }: Props) {
   return (
     <article
-      className={`flex w-full flex-col rounded-xl ${isComment ? "px-0 xs:px-7" : "bg-dark-2 p-7"
-        }`}
+      className={`flex w-full flex-col rounded-xl ${
+        isComment ? "px-0 xs:px-7" : "bg-dark-2 p-7"
+      }`}
     >
       <div className='flex items-start justify-between'>
         <div className='flex w-full flex-1 flex-row gap-4'>
@@ -55,7 +57,7 @@ function NerdTalkCard({
               />
             </Link>
 
-            <div className='nerdtalk-card_bar' />
+            <div className='thread-card_bar' />
           </div>
 
           <div className='flex w-full flex-col'>
@@ -76,7 +78,7 @@ function NerdTalkCard({
                   height={24}
                   className='cursor-pointer object-contain'
                 />
-                <Link href={`/nerdtalk/${id}`}>
+                <Link href={`/thread/${id}`}>
                   <Image
                     src='/assets/reply.svg'
                     alt='heart'
@@ -102,7 +104,7 @@ function NerdTalkCard({
               </div>
 
               {isComment && comments.length > 0 && (
-                <Link href={`/nerdtalk/${id}`}>
+                <Link href={`/thread/${id}`}>
                   <p className='mt-1 text-subtle-medium text-gray-1'>
                     {comments.length} repl{comments.length > 1 ? "ies" : "y"}
                   </p>
@@ -112,8 +114,8 @@ function NerdTalkCard({
           </div>
         </div>
 
-        <DeleteNerdTalk
-          nerdTalkId={JSON.stringify(id)}
+        <DeleteThread
+          threadId={JSON.stringify(id)}
           currentUserId={currentUserId}
           authorId={author.id}
           parentId={parentId}
@@ -134,7 +136,7 @@ function NerdTalkCard({
             />
           ))}
 
-          <Link href={`/nerdtalk/${id}`}>
+          <Link href={`/thread/${id}`}>
             <p className='mt-1 text-subtle-medium text-gray-1'>
               {comments.length} repl{comments.length > 1 ? "ies" : "y"}
             </p>
@@ -165,4 +167,4 @@ function NerdTalkCard({
   );
 }
 
-export default NerdTalkCard;
+export default ThreadCard;
